@@ -23,17 +23,34 @@ function log(mensaje) {
   console.log(`[${new Date().toLocaleString("es-ES")}] ${mensaje}`);
 }
 
+// En Windows la configuración está en config.json; en GitHub Actions, en variables de entorno
 function leerJsonConfig() {
   try {
     return JSON.parse(readFileSync(RUTA_CONFIG, "utf8").replace(/^﻿/, ""));
   } catch (err) {
-    if (err.code === "ENOENT") throw new Error("No encuentro config.json. Ejecuta instalar.cmd para configurar el programa.");
+    if (err.code === "ENOENT") return null;
     throw new Error(`config.json está dañado (${err.message}). Ejecuta instalar.cmd.`);
   }
 }
 
+function configDeEntorno(env) {
+  if (!env.WOFFU_EMAIL && !env.WOFFU_PASSWORD) {
+    throw new Error("No encuentro config.json. Ejecuta instalar.cmd para configurar el programa.");
+  }
+  return {
+    email: env.WOFFU_EMAIL,
+    password: env.WOFFU_PASSWORD,
+    horario: env.HORARIO || undefined,
+    vacaciones: env.DIAS_SIN_FICHAR || undefined,
+    margenMinutos: env.MARGEN_MINUTOS || undefined,
+    zonaHoraria: env.ZONA_HORARIA || undefined,
+  };
+}
+
 function leerConfig(c) {
-  if (!c.email || !c.password) throw new Error("Faltan el email o la contraseña. Ejecuta instalar.cmd.");
+  if (!c.email || !c.password) {
+    throw new Error("Faltan el email o la contraseña (instalar.cmd en Windows, o los secrets en GitHub).");
+  }
 
   const zonaHoraria = c.zonaHoraria || "Europe/Madrid";
   try {
@@ -53,7 +70,7 @@ function leerConfig(c) {
 
 async function main(prueba) {
   const crudo = leerJsonConfig();
-  const config = leerConfig(crudo);
+  const config = leerConfig(crudo ?? configDeEntorno(process.env));
   const ahora = ahoraEn(config.zonaHoraria);
   const decision = decidir({ horario: config.horario, hora: ahora.hora, margen: config.margen });
   const deVacaciones = config.vacaciones.includes(ahora.fecha);
@@ -62,7 +79,7 @@ async function main(prueba) {
   if (!prueba && (ahora.finDeSemana || deVacaciones || !decision.hora)) return;
 
   const sesion = await woffu.login(config);
-  if (crudo.empresa !== sesion.empresa) {
+  if (crudo && crudo.empresa !== sesion.empresa) {
     writeFileSync(RUTA_CONFIG, JSON.stringify({ ...crudo, empresa: sesion.empresa }, null, 2));
   }
   const [yo, dia, fichajes] = await Promise.all([

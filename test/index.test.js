@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { leerHorario, leerMargen, ahoraEn, decidir, hayQueFichar } from "../src/horario.js";
+import { leerHorario, leerFechas, leerMargen, ahoraEn, decidir, hayQueFichar } from "../src/horario.js";
 import * as woffu from "../src/woffu.js";
 
 const horario = ["09:00", "14:00", "15:00", "18:00"];
@@ -25,6 +25,13 @@ test("normaliza y valida el horario", () => {
   assert.throws(() => leerHorario("9h 14h"), /no válida/);
   assert.throws(() => leerHorario("22:00 06:00"), /medianoche/);
   assert.throws(() => leerHorario("09:00 09:00"), /en orden/);
+});
+
+test("lee los días sin fichar en los dos formatos", () => {
+  assert.deepEqual(leerFechas(), []);
+  assert.deepEqual(leerFechas(["2026-12-24"]), ["2026-12-24"]);
+  assert.deepEqual(leerFechas("24/12/2026, 1/1/2027"), ["2026-12-24", "2027-01-01"]);
+  assert.throws(() => leerFechas("mañana"), /no válida/);
 });
 
 test("valida el margen", () => {

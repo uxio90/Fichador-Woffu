@@ -12,7 +12,12 @@ Inspirado en [ficheitor](https://github.com/elias-garcia/ficheitor) (2020), rehe
 sin Heroku y sin dependencias. El login nuevo y el calendario de Woffu se basan en cómo los usa
 [woffux](https://github.com/ngavilan-dogfy/woffux) (MIT).
 
-## Instalación
+Hay dos formas de usarlo. Elige **solo una**:
+
+- **[En tu PC con Windows](#instalación-en-windows)**: ficha desde tu PC, que tiene que estar encendido.
+- **[En la nube con GitHub](#en-la-nube-con-github-sin-pc)**: ficha aunque no tengas ningún PC encendido.
+
+## Instalación en Windows
 
 1. **[Descarga el zip](https://github.com/uxio90/Fichador-Woffu/releases/latest/download/Fichador-Woffu.zip)** y
    descomprímelo en una carpeta que no vayas a borrar, por ejemplo `C:\Fichador-Woffu`.
@@ -27,7 +32,47 @@ Listo. A partir de ahí el PC ficha solo.
 > Si Windows muestra "Windows protegió su PC" al abrir `instalar.cmd`, pulsa **Más información → Ejecutar de todas formas**.
 > Pasa con cualquier script descargado de internet.
 
-## Uso diario
+## En la nube con GitHub (sin PC)
+
+GitHub ejecuta el programa en sus servidores cada 15 minutos. Gratis, todo desde el navegador, unos 10 minutos.
+
+> **Antes de nada:** Woffu guarda la IP desde la que fichas. Desde GitHub será la de un servidor de Microsoft
+> (normalmente en EE. UU.), no la de tu casa ni la de tu oficina. Si tu empresa revisa eso, usa la versión de Windows.
+
+1. Necesitas una cuenta de GitHub (gratis). Arriba en esta página pulsa **Use this template → Create a new
+   repository**, ponle un nombre y marca **Private**. Tiene que ser privado: si no, cualquiera vería a qué hora fichas.
+2. En tu copia, ve a **Settings → Secrets and variables → Actions**.
+   - Pestaña **Secrets** → **New repository secret**, y crea estos dos (nadie podrá verlos después, ni tú):
+
+     | Nombre | Valor |
+     | --- | --- |
+     | `WOFFU_EMAIL` | tu email de Woffu |
+     | `WOFFU_PASSWORD` | tu contraseña de Woffu |
+
+   - Pestaña **Variables** → **New repository variable**:
+
+     | Nombre | Valor | |
+     | --- | --- | --- |
+     | `HORARIO` | `09:00 14:00 15:00 18:00` | Obligatoria. Sin ella no ficha. |
+     | `DIAS_SIN_FICHAR` | `24/12/2026 31/12/2026` | Opcional. Días que no quieres que fiche aparte de los de Woffu. |
+
+3. Ve a la pestaña **Actions** → **Fichar** → **Run workflow** (con "Solo probar" marcado) → **Run workflow**.
+   Al cabo de un minuto, entra en la ejecución y abre el paso `node src/index.js`: debe decir
+   "Conectado a ... como (tu nombre)".
+
+Listo: desde ese momento ficha solo. Si algo falla, GitHub te manda un email.
+
+- **Para cambiar el horario**: edita la variable `HORARIO`.
+- **Para dejar de fichar**: borra la variable `HORARIO`, o en **Actions → Fichar → ⋯ → Disable workflow**.
+- **Retrasos**: GitHub a veces lanza las tareas con 5-20 minutos de retraso, así que puedes fichar a las 09:12 en vez de
+  a las 09:02. Si se retrasa más de una hora, ese fichaje no se hace (como con el PC apagado).
+- **Coste**: unos 1.250 de los 2.000 minutos gratis al mes que GitHub da a los repositorios privados.
+- **Actualizaciones**: tu copia no se actualiza sola. Si Woffu cambia algo y aquí se arregla, tendrás que copiar el
+  cambio (o crear una copia nueva).
+
+Si usas la nube, no instales también la versión de Windows (o desinstálala con `desinstalar.cmd`).
+
+## Uso diario en Windows
 
 | Archivo | Para qué |
 | --- | --- |
@@ -38,7 +83,7 @@ Listo. A partir de ahí el PC ficha solo.
 
 ## Cómo funciona
 
-Windows lanza el programa cada 15 minutos durante tu jornada. Cada vez:
+Windows (o GitHub) lanza el programa cada 15 minutos durante tu jornada. Cada vez:
 
 1. Si no estás a menos de una hora de alguna hora de tu horario, no hace nada.
 2. Entra en Woffu y mira si hoy es laborable para ti: no festivo, sin vacaciones ni ausencias.
@@ -81,3 +126,5 @@ Node.js 24, sin dependencias. `npm test` lanza las pruebas; `npm run prueba` es 
 - `src/woffu.js`: cliente de la API de Woffu (login, calendario, fichajes).
 - `src/index.js`: lee `config.json` y une lo anterior.
 - `scripts/`: asistente de instalación y tarea programada (PowerShell 5.1).
+- `.github/workflows/fichar.yml`: la versión en la nube. Sin `config.json`, la configuración se lee de las variables
+  de entorno `WOFFU_EMAIL`, `WOFFU_PASSWORD`, `HORARIO`, `DIAS_SIN_FICHAR`, `MARGEN_MINUTOS` y `ZONA_HORARIA`.

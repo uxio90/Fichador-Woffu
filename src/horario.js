@@ -37,11 +37,15 @@ export function leerMargen(valor = 60) {
   return margen;
 }
 
+// ["2026-12-24"] o "24/12/2026 31/12/2026" -> ["2026-12-24", "2026-12-31"]
 export function leerFechas(valor = []) {
-  for (const f of valor) {
-    if (!FECHA.test(f)) throw new Error(`Fecha de vacaciones no válida: "${f}". Usa el formato 2026-12-24.`);
-  }
-  return valor;
+  const lista = Array.isArray(valor) ? valor : String(valor).split(/[\s,;]+/).filter(Boolean);
+  return lista.map((f) => {
+    const dma = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(f);
+    const fecha = dma ? `${dma[3]}-${dma[2].padStart(2, "0")}-${dma[1].padStart(2, "0")}` : f;
+    if (!FECHA.test(fecha)) throw new Error(`Fecha no válida en los días sin fichar: "${f}". Usa el formato 24/12/2026.`);
+    return fecha;
+  });
 }
 
 export function minutos(hhmm) {

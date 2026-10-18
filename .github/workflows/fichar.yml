@@ -1,0 +1,40 @@
+# Fichar desde GitHub, sin PC encendido. Instrucciones en el README ("En la nube").
+# No hace nada hasta que configuras la variable HORARIO en tu copia privada.
+
+name: Fichar
+
+on:
+  schedule:
+    # Cada 15 min de lunes a viernes, 05:00-18:59 UTC = 06:00-19:59 (invierno) / 07:00-20:59 (verano) en Madrid.
+    # Minutos 2/17/32/47 en vez de en punto: a las horas en punto GitHub va más saturado y se retrasa más.
+    # El programa decide si toca fichar.
+    - cron: "2,17,32,47 5-18 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      prueba:
+        description: "Solo probar (no ficha)"
+        type: boolean
+        default: true
+
+concurrency:
+  group: fichar
+  cancel-in-progress: false
+
+jobs:
+  fichar:
+    if: vars.HORARIO != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node src/index.js ${{ (github.event_name == 'workflow_dispatch' && inputs.prueba) && '--prueba' || '' }}
+        env:
+          TZ: Europe/Madrid
+          WOFFU_EMAIL: ${{ secrets.WOFFU_EMAIL }}
+          WOFFU_PASSWORD: ${{ secrets.WOFFU_PASSWORD }}
+          HORARIO: ${{ vars.HORARIO }}
+          DIAS_SIN_FICHAR: ${{ vars.DIAS_SIN_FICHAR }}
+          MARGEN_MINUTOS: ${{ vars.MARGEN_MINUTOS }}
