@@ -34,6 +34,9 @@ function leerJsonConfig() {
 }
 
 function configDeEntorno(env) {
+  if (env.GITHUB_ACTIONS && (!env.WOFFU_EMAIL || !env.WOFFU_PASSWORD)) {
+    throw new Error("Faltan los secrets WOFFU_EMAIL y/o WOFFU_PASSWORD en Settings → Secrets and variables → Actions.");
+  }
   if (!env.WOFFU_EMAIL && !env.WOFFU_PASSWORD) {
     throw new Error("No encuentro config.json. Ejecuta instalar.cmd para configurar el programa.");
   }
