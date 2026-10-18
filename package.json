@@ -1,0 +1,15 @@
+{
+  "name": "fichador-woffu",
+  "version": "1.0.0",
+  "description": "Ficha automáticamente en Woffu a tus horas, desde un PC con Windows",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "prueba": "node src/index.js --prueba",
+    "test": "node --test"
+  }
+}
