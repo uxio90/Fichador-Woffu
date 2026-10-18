@@ -9,7 +9,8 @@ Ficha por ti en **Woffu** a tus horas, de lunes a viernes, desde un PC con Windo
 - Comprueba que Woffu ha guardado de verdad cada fichaje.
 
 Inspirado en [ficheitor](https://github.com/elias-garcia/ficheitor) (2020), rehecho para 2026: el login nuevo de Woffu,
-sin Heroku y sin dependencias.
+sin Heroku y sin dependencias. El login nuevo y el calendario de Woffu se basan en cómo los usa
+[woffux](https://github.com/ngavilan-dogfy/woffux) (MIT).
 
 ## Instalación
 
